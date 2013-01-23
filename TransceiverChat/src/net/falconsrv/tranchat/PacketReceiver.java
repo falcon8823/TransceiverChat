@@ -26,7 +26,7 @@ public class PacketReceiver implements Runnable {
 				recv_socket.receive(recv_packet);
 
 				// 受信したパケットをリスナーに通知
-				this.p_listener.packetReceived(PacketBase.fromDatagramPacket(recv_packet));
+				this.p_listener.messageReceived(MessagePacket.fromDatagramPacket(recv_packet));
 			}
 
 		} catch (IOException e) {
