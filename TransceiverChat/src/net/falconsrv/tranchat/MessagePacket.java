@@ -44,12 +44,18 @@ public class MessagePacket extends PacketBase {
 		ByteBuffer buf = ByteBuffer.wrap(raw_bytes);
 		buf.order(ByteOrder.BIG_ENDIAN);
 
+		// PacketKind取得
 		p.setKind(PacketKind.values()[buf.get()]);
 
+		// Sender Name取得
 		byte[] name_buf = new byte[NAME_LENGTH];
 		buf.get(name_buf, 0, NAME_LENGTH);
-		p.setSender_name(new String(name_buf, CHAR_SET));
+		// 0パディングを取り除く
+		int i;
+		for(i = 0; i < name_buf.length; i++) if(name_buf[i] == 0) break;
+		p.setSender_name(new String(name_buf, 0, i, CHAR_SET));
 
+		// Data部取得
 		buf.get(p.getData(), 0, DATA_LENGTH);
 
 		return p;
