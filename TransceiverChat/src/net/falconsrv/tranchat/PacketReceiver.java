@@ -5,7 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 
-public class PacketReceiver implements Runnable {
+public class PacketReceiver extends Thread {
 	final int port = 12345;
 	private DatagramSocket recv_socket;
 	private PacketListener p_listener;

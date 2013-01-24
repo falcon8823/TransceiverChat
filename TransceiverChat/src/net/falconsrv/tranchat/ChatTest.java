@@ -18,7 +18,7 @@ public class ChatTest {
 			}
 		});
 
-		recv.run();
+		recv.start();
 	}
 
 }
