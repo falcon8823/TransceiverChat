@@ -15,12 +15,14 @@ public class TransceiverChat {
 	public static final String DEFAULT_NAME = "Annonymous";
 	public static int port;
 	public static String user_name;
+	public static InetAddress dst_addr;
 
 	public static void main(String[] args) {
 		try {
 			DEFAULT_ADDR = Inet4Address.getByName("255.255.255.255");
 			port = DEFAULT_PORT;
 			user_name = DEFAULT_NAME;
+			dst_addr = DEFAULT_ADDR;
 		} catch (UnknownHostException e1) {
 			e1.printStackTrace();
 		}

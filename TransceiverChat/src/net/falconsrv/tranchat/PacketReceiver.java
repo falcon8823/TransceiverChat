@@ -11,7 +11,7 @@ public class PacketReceiver extends Thread {
 	private PacketListener p_listener;
 
 	public PacketReceiver(int port) {
-		this.port = port;
+		this.setPort(port);
 	}
 
 	@Override
@@ -22,7 +22,7 @@ public class PacketReceiver extends Thread {
 		// port番号のポートでソケットをバインド
 		try {
 			// バインド
-			recv_socket = new DatagramSocket(port);
+			recv_socket = new DatagramSocket(getPort());
 			recv_packet = new DatagramPacket(buffer, buffer.length);
 
 			while(!recv_socket.isClosed()) {
@@ -43,11 +43,21 @@ public class PacketReceiver extends Thread {
 	}
 
 	public void close() {
-		if(!this.recv_socket.isClosed()) this.recv_socket.close();
+		if(!this.recv_socket.isClosed()) {
+			this.recv_socket.close();
+		}
 	}
 
 	public void addPacketListner(PacketListener l) {
 		this.p_listener = l;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
 	}
 
 }
