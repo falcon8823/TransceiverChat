@@ -5,7 +5,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 
+// パケットクラスのベースクラス
+// DatagramPacketと実データを媒介するモデルクラス
 public class PacketBase {
+	// パケット長の定義
 	public static final int KIND_LENGTH = 1;
 	public static final int NAME_LENGTH = 30;
 	public static final int DATA_LENGTH = 1024;
@@ -20,6 +23,7 @@ public class PacketBase {
 		this.data = new byte[DATA_LENGTH];
 	}
 
+	// パケットからバイト列を取得
 	public void getBytes(byte[] buffer) {
 		ByteBuffer buf = ByteBuffer.wrap(buffer);
 
@@ -29,20 +33,22 @@ public class PacketBase {
 		buf.put(this.data);
 	}
 
+	// DatagramPacketからPacketBaseへの変換
 	public static PacketBase fromDatagramPacket(DatagramPacket p) {
 		return fromByteArray(p.getData());
 	}
 
+	// バイト列からPacketBaseへの変換
 	public static PacketBase fromByteArray(byte[] raw_bytes) {
 		PacketBase p = new PacketBase();
 
 		ByteBuffer buf = ByteBuffer.wrap(raw_bytes);
 		buf.order(ByteOrder.BIG_ENDIAN);
 
-		// PacketKind取得
+		// PacketKind取得(1byte)
 		p.setKind(PacketKind.values()[buf.get()]);
 
-		// Sender Name取得
+		// Sender Name取得(30byte)
 		byte[] name_buf = new byte[NAME_LENGTH];
 		buf.get(name_buf, 0, NAME_LENGTH);
 		// 0パディングを取り除く
@@ -50,7 +56,7 @@ public class PacketBase {
 		for(i = 0; i < name_buf.length; i++) if(name_buf[i] == 0) break;
 		p.setSender_name(new String(name_buf, 0, i, CHAR_SET));
 
-		// Data部取得
+		// Data部取得(1024byte)
 		buf.get(p.getData(), 0, DATA_LENGTH);
 
 		return p;

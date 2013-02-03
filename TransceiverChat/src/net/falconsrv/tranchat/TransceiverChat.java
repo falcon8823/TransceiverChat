@@ -9,15 +9,19 @@ import javax.swing.UIManager;
 
 import net.falconsrv.tranchat.gui.ChatFrame;
 
+// メインクラス
 public class TransceiverChat {
+	// プログラム全体で共通のstatic変数
 	public static InetAddress DEFAULT_ADDR;
 	public static final int DEFAULT_PORT = 12345;
-	public static final String DEFAULT_NAME = "Annonymous";
+	public static final String DEFAULT_NAME = "Anonymous";
 	public static int port;
 	public static String user_name;
 	public static InetAddress dst_addr;
 
+	// プログラムのエントリポイント
 	public static void main(String[] args) {
+		// デフォルトパラメータの設定
 		try {
 			DEFAULT_ADDR = Inet4Address.getByName("255.255.255.255");
 			port = DEFAULT_PORT;
@@ -27,6 +31,7 @@ public class TransceiverChat {
 			e1.printStackTrace();
 		}
 
+		// メインウィンドウの起動
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {

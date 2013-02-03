@@ -4,7 +4,7 @@ import java.net.DatagramPacket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-
+// メッセージパケットを格納するクラス
 public class MessagePacket extends PacketBase {
 	public MessagePacket() {
 		this.kind = PacketKind.Message;
@@ -21,6 +21,7 @@ public class MessagePacket extends PacketBase {
 		this.sender_name = sender_name;
 	}
 
+	// パケットのバイト列から，メッセージ部を取り出す
 	public String getMsgBody() {
 		int i;
 		for(i = 0; i < this.data.length; i++) {
@@ -30,6 +31,7 @@ public class MessagePacket extends PacketBase {
 		return new String(this.data, 0, i, CHAR_SET);
 	}
 
+	// Stringからパケットのバイト列にセット
 	public void setMsgBody(String msg) {
 		this.data = msg.getBytes(CHAR_SET);
 	}
@@ -38,6 +40,7 @@ public class MessagePacket extends PacketBase {
 		return fromByteArray(p.getData());
 	}
 
+	// パケットのバイト列からMessagePacketへ変換するメソッド
 	public static MessagePacket fromByteArray(byte[] raw_bytes) {
 		MessagePacket p = new MessagePacket();
 
