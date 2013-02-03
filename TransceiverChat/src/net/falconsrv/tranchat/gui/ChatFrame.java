@@ -1,29 +1,34 @@
 package net.falconsrv.tranchat.gui;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
-import java.net.InetAddress;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 import net.falconsrv.tranchat.MessagePacket;
 import net.falconsrv.tranchat.PacketListener;
+import net.falconsrv.tranchat.PacketReceiver;
 import net.falconsrv.tranchat.PacketSender;
+import net.falconsrv.tranchat.TransceiverChat;
 
-public class ChatFrame extends JFrame implements PacketListener {
+public class ChatFrame extends JFrame implements PacketListener, WindowListener {
 
 	private JPanel contentPane;
 	private JSplitPane splitPane_1;
@@ -33,10 +38,14 @@ public class ChatFrame extends JFrame implements PacketListener {
 	private JScrollPane streamScrollPane;
 	private JTextArea chatStreamBox;
 	private JTextArea sendTextBox;
-	private JTextField nameTextField;
-	private JLabel lblNewLabel;
-	private JPanel panel;
-	private JButton btnSet;
+	private JMenuBar menuBar;
+	private JMenu mnNewMenu;
+	private JMenuItem menuItem;
+	private JSeparator separator;
+	private JMenuItem menuItem_1;
+
+	private PacketReceiver receiver;
+	private SettingFrame dialog;
 
 	/**
 	 * Create the frame.
@@ -44,6 +53,31 @@ public class ChatFrame extends JFrame implements PacketListener {
 	public ChatFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 553, 589);
+
+		menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+
+		mnNewMenu = new JMenu("接続");
+		menuBar.add(mnNewMenu);
+
+		menuItem = new JMenuItem("設定");
+		menuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dialog.setVisible(true);
+			}
+		});
+		mnNewMenu.add(menuItem);
+
+		separator = new JSeparator();
+		mnNewMenu.add(separator);
+
+		menuItem_1 = new JMenuItem("終了");
+		menuItem_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
+		mnNewMenu.add(menuItem_1);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -77,8 +111,8 @@ public class ChatFrame extends JFrame implements PacketListener {
 		sendBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					PacketSender sender = new PacketSender(InetAddress.getByName("127.0.0.255"), 12345);
-					MessagePacket p = new MessagePacket("hoge", sendTextBox.getText());
+					PacketSender sender = new PacketSender(TransceiverChat.dst_addr, TransceiverChat.port);
+					MessagePacket p = new MessagePacket(TransceiverChat.user_name, sendTextBox.getText());
 					sender.sendPacket(p);
 					sendTextBox.setText("");
 				} catch (IOException e1) {
@@ -86,6 +120,7 @@ public class ChatFrame extends JFrame implements PacketListener {
 				}
 			}
 		});
+
 		splitPane.setRightComponent(sendBtn);
 		splitPane.setDividerLocation(400);
 
@@ -97,30 +132,48 @@ public class ChatFrame extends JFrame implements PacketListener {
 		streamScrollPane.setViewportView(chatStreamBox);
 		splitPane_1.setDividerLocation(400);
 
-		panel = new JPanel();
-		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
-		flowLayout.setAlignment(FlowLayout.LEFT);
-		contentPane.add(panel, BorderLayout.NORTH);
 
-		lblNewLabel = new JLabel("Name: ");
-		panel.add(lblNewLabel);
+		// パケットレシーバ開始
+		receiver = new PacketReceiver(TransceiverChat.port);
+		receiver.addPacketListner(this);
+		receiver.start();
 
-		nameTextField = new JTextField();
-		panel.add(nameTextField);
-		nameTextField.setColumns(10);
-
-		btnSet = new JButton("Set");
-		panel.add(btnSet);
+		dialog = new SettingFrame();
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		dialog.addWindowListener(this);
 	}
 
 	@Override
 	public void messageReceived(MessagePacket packet) {
 		String line = "[" + packet.getSender_name() + "]: " + packet.getMsgBody() + "\n";
-		//System.out.print(line);
 		chatStreamBox.append(line);
 		chatStreamBox.setCaretPosition(chatStreamBox.getText().length());
-
-
 	}
+
+	@Override
+	public void windowOpened(WindowEvent e) {}
+
+	@Override
+	public void windowClosing(WindowEvent e) {}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+		receiver.close();
+		receiver = new PacketReceiver(TransceiverChat.port);
+		receiver.addPacketListner(this);
+		receiver.start();
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {}
+
+	@Override
+	public void windowActivated(WindowEvent e) {}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {}
 
 }
